@@ -1,21 +1,15 @@
 mod math;
 mod problems;
 
+use crate::problems::PROBLEM_MAP;
 use std::collections::HashMap;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let problem_map: HashMap<usize, fn() -> String> = [
-        (1, problems::problem001::subject as fn() -> String),
-        (2, problems::problem002::subject as fn() -> String),
-    ]
-    .into_iter()
-    .collect(); // TODO: static in problem/mod.rs
-
     match args.len() {
-        1 => run_all_problems(&problem_map),
+        1 => run_all_problems(&PROBLEM_MAP),
         2 => match args[1].parse::<usize>() {
-            Ok(problem_number) => run_specific_problem(problem_number, &problem_map),
+            Ok(problem_number) => run_specific_problem(problem_number, &PROBLEM_MAP),
             Err(_) => argument_error("Error: Argument is not a valid number."),
         },
         _ => argument_error("Error: Invalid number of arguments."),
@@ -26,7 +20,7 @@ fn argument_error(message: &str) {
     eprintln!("{}", message);
     eprintln!("Usage:");
     eprintln!("  cargo run              # Runs all problems");
-    eprintln!("  cargo run -- <number>  # Runs the specific problem with the given number");
+    eprintln!("  cargo run -- <number>  # Runs the problem with the given number");
     std::process::exit(1);
 }
 

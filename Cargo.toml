@@ -8,4 +8,5 @@ cached = { version = "0.53.1", default-features = false, features = [
     "proc_macro",
 ] }
 itertools = "0.13.0"
+lazy_static = { version = "1.4.0", default-features = false }
 rand = "0.8.5"
