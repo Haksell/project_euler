@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 
@@ -32,6 +33,8 @@ assert len(sys.argv) == 2
 num = int(sys.argv[1])
 assert num > 0
 
+problem_filename = f"src/problems/problem{num:03}.rs"
+
 mods, top, inserts, bottom = re.fullmatch(
     r"((?:mod problem\d{3};\n)+)(.*?)((?: +map\.insert[^\n]*;\n)+)(.*)",
     open(MOD_FILENAME).read(),
@@ -49,4 +52,5 @@ inserts = "\n".join(
 )
 
 open(MOD_FILENAME, "w").write(mods + "\n" + top + inserts + "\n" + bottom)
-open(f"src/problems/problem{num:03}.rs", "w").write(TEMPLATE)
+open(problem_filename, "w").write(TEMPLATE)
+os.system(f"code {problem_filename}")
