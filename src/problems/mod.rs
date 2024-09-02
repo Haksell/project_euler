@@ -1,6 +1,7 @@
 mod problem001;
 mod problem002;
 mod problem003;
+mod problem005;
 mod problem006;
 
 use lazy_static::lazy_static;
@@ -12,6 +13,7 @@ lazy_static! {
         map.insert(1, problem001::subject as fn() -> String);
         map.insert(2, problem002::subject as fn() -> String);
         map.insert(3, problem003::subject as fn() -> String);
+        map.insert(5, problem005::subject as fn() -> String);
         map.insert(6, problem006::subject as fn() -> String);
         map
     };
