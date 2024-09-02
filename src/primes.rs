@@ -2,8 +2,6 @@ use crate::math::isqrt;
 
 pub fn primes_below(n: u64) -> Vec<u64> {
     let mut sieve = vec![true; n as usize];
-    sieve[0] = false;
-    sieve[1] = false;
     for i in 2..=isqrt(n) as usize {
         if sieve[i] {
             for j in (i * i..n as usize).step_by(i) {
@@ -14,6 +12,7 @@ pub fn primes_below(n: u64) -> Vec<u64> {
     sieve
         .iter()
         .enumerate()
+        .skip(2)
         .filter_map(|(i, &is_prime)| if is_prime { Some(i as u64) } else { None })
         .collect()
 }
