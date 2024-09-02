@@ -21,7 +21,7 @@ fn solve(factors: &[u32], limit: u32) -> u64 {
         return 0;
     }
 
-    fn reduce_factors(factors: &[u32]) -> Vec<u32> {
+    let factors = {
         let mut reduced = vec![];
         for &f in factors.iter().sorted() {
             if f != 0 && reduced.iter().all(|r| f % r != 0) {
@@ -29,10 +29,11 @@ fn solve(factors: &[u32], limit: u32) -> u64 {
             }
         }
         reduced
-    }
+    };
 
-    let factors = reduce_factors(factors);
-    if 1 << factors.len() > factors.len() * limit as usize {
+    let naive_complexity = factors.len() * limit as usize;
+    let smart_complexity = 1 << factors.len();
+    if naive_complexity < smart_complexity {
         return naive(&factors, limit);
     }
 
