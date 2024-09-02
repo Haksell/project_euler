@@ -1,6 +1,7 @@
 mod math;
+mod primes;
 mod problems;
-mod utils;
+mod sequences;
 
 use crate::problems::PROBLEMS;
 

@@ -15,8 +15,8 @@ mod tests {
         assert!(is_palindrome(&[42, 0, 42]));
         assert!(is_palindrome(&[42, 0, 0, 42]));
         assert!(is_palindrome(&[42, 0, 17, 0, 42]));
-        assert!(is_palindrome(&[42, 0, 17, 42, 42]));
-        assert!(is_palindrome(&[42, 17, 17, 0, 42]));
-        assert!(is_palindrome(&[42, 17, 42, 17]));
+        assert!(!is_palindrome(&[42, 0, 17, 42, 42]));
+        assert!(!is_palindrome(&[42, 17, 17, 0, 42]));
+        assert!(!is_palindrome(&[42, 17, 42, 17]));
     }
 }

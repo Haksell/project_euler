@@ -1,4 +1,4 @@
-use crate::{math::digits, utils::is_palindrome};
+use crate::{math::digits, sequences::is_palindrome};
 
 pub fn subject() -> String {
     solve(3).to_string()
