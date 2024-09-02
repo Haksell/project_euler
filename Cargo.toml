@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cached = { version = "0.53.1", default-features = false, features = [
+    "proc_macro",
+] }
+itertools = "0.13.0"
+rand = "0.8.5"

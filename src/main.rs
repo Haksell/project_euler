@@ -1,3 +1,4 @@
+mod math;
 mod problems;
 
 use std::collections::HashMap;
@@ -9,7 +10,7 @@ fn main() {
         (2, problems::problem002::subject as fn() -> String),
     ]
     .into_iter()
-    .collect();
+    .collect(); // TODO: static in problem/mod.rs
 
     match args.len() {
         1 => run_all_problems(&problem_map),

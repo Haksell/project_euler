@@ -1,22 +1,110 @@
+use crate::math;
+use cached::proc_macro::cached;
+use itertools::Itertools as _;
+
 pub fn subject() -> String {
     solve(&[3, 5], 1000).to_string()
 }
 
-fn solve(factors: &[u32], limit: u32) -> u32 {
-    (1..limit)
-        .filter(|&n| factors.iter().any(|&factor| n % factor == 0))
+fn naive(factors: &[u32], limit: u32) -> u64 {
+    (1..limit as u64)
+        .filter(|&n| {
+            factors
+                .iter()
+                .any(|&factor| factor > 0 && n % factor as u64 == 0)
+        })
         .sum()
+}
+
+fn solve(factors: &[u32], limit: u32) -> u64 {
+    if limit <= 1 {
+        return 0;
+    }
+
+    fn reduce_factors(factors: &[u32]) -> Vec<u32> {
+        let mut reduced = vec![];
+        for &f in factors.iter().sorted() {
+            if f != 0 && reduced.iter().all(|r| f % r != 0) {
+                reduced.push(f);
+            }
+        }
+        reduced
+    }
+
+    let factors = reduce_factors(factors);
+    if 1 << factors.len() > factors.len() * limit as usize {
+        return naive(&factors, limit);
+    }
+
+    fn helper(factors: &[u32], limit: u32, lcm: u64, i: usize, mult: i64) -> i64 {
+        if lcm >= limit as u64 {
+            0
+        } else if i == factors.len() {
+            sum_multiples(lcm as u32, limit) as i64 * mult
+        } else {
+            helper(factors, limit, lcm, i + 1, mult)
+                + helper(
+                    factors,
+                    limit,
+                    math::lcm(lcm as u32, factors[i]),
+                    i + 1,
+                    if mult == 1 { -1 } else { 1 },
+                )
+        }
+    }
+
+    helper(&factors, limit, 1, 0, 0) as u64
+}
+
+#[cached]
+fn sum_multiples(n: u32, limit: u32) -> u64 {
+    let cnt = ((limit - 1) / n) as u64;
+    n as u64 * cnt * (cnt + 1) >> 1
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::Rng;
 
     #[test]
-    fn test_solve() {
+    fn test_subject() {
+        assert_eq!(solve(&[3, 5], 1000), 233168);
+    }
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(solve(&[4], 20), 40);
+        assert_eq!(solve(&[4], 21), 60);
         assert_eq!(solve(&[3, 5], 10), 23);
         assert_eq!(solve(&[4, 5], 10), 17);
         assert_eq!(solve(&[3, 6], 10), 18);
-        assert_eq!(solve(&[3, 5], 1000), 233168);
+        assert_eq!(solve(&[2, 3, 4], 10), 32);
+        assert_eq!(solve(&[4, 5, 6], 21), 114);
+        assert_eq!(solve(&[1, 2, 3, 4, 5, 42], 101), 5050);
+    }
+
+    #[test]
+    fn test_edge_cases() {
+        assert_eq!(solve(&[], 10), 0);
+        assert_eq!(solve(&[0], 10), 0);
+        assert_eq!(solve(&[1], 10), 45);
+        assert_eq!(solve(&[0, 1, 1, 1, 0], 10), 45);
+        assert_eq!(solve(&[3, 5], 0), 0);
+        assert_eq!(solve(&[3, 5], 1), 0);
+        assert_eq!(solve(&[3, 5], 2), 0);
+        assert_eq!(solve(&[3, 5], 3), 0);
+        assert_eq!(solve(&[3, 5], 4), 3);
+    }
+
+    #[test]
+    fn test_random() {
+        let mut rng = rand::thread_rng();
+        for _ in 0..100 {
+            let num_factors = rng.gen_range(1..=5);
+            let factors: Vec<u32> = (0..num_factors).map(|_| rng.gen_range(1..=12)).collect();
+            let limit = rng.gen_range(10..=1000);
+            assert_eq!(solve(&factors, limit), naive(&factors, limit));
+        }
     }
 }
