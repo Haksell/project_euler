@@ -6,17 +6,13 @@ pub fn subject() -> String {
     solve(&[3, 5], 1000).to_string()
 }
 
-fn naive(factors: &[u32], limit: u32) -> u64 {
-    (1..limit as u64)
-        .filter(|&n| {
-            factors
-                .iter()
-                .any(|&factor| factor > 0 && n % factor as u64 == 0)
-        })
+fn naive(factors: &[u64], limit: u64) -> u64 {
+    (1..limit)
+        .filter(|&n| factors.iter().any(|&factor| factor > 0 && n % factor == 0))
         .sum()
 }
 
-fn solve(factors: &[u32], limit: u32) -> u64 {
+fn solve(factors: &[u64], limit: u64) -> u64 {
     if limit <= 1 {
         return 0;
     }
@@ -37,17 +33,17 @@ fn solve(factors: &[u32], limit: u32) -> u64 {
         return naive(&factors, limit);
     }
 
-    fn helper(factors: &[u32], limit: u32, lcm: u64, i: usize, mult: i64) -> i64 {
-        if lcm >= limit as u64 {
+    fn helper(factors: &[u64], limit: u64, lcm: u64, i: usize, mult: i64) -> i64 {
+        if lcm >= limit {
             0
         } else if i == factors.len() {
-            sum_multiples(lcm as u32, limit) as i64 * mult
+            sum_multiples(lcm, limit) as i64 * mult
         } else {
             helper(factors, limit, lcm, i + 1, mult)
                 + helper(
                     factors,
                     limit,
-                    math::lcm(lcm, factors[i] as u64),
+                    math::lcm(lcm, factors[i]),
                     i + 1,
                     if mult == 1 { -1 } else { 1 },
                 )
@@ -58,9 +54,9 @@ fn solve(factors: &[u32], limit: u32) -> u64 {
 }
 
 #[cached]
-fn sum_multiples(n: u32, limit: u32) -> u64 {
-    let cnt = ((limit - 1) / n) as u64;
-    n as u64 * cnt * (cnt + 1) >> 1
+fn sum_multiples(n: u64, limit: u64) -> u64 {
+    let cnt = (limit - 1) / n;
+    n * cnt * (cnt + 1) >> 1
 }
 
 #[cfg(test)]
@@ -103,7 +99,7 @@ mod tests {
         let mut rng = rand::thread_rng();
         for _ in 0..100 {
             let num_factors = rng.gen_range(1..=5);
-            let factors: Vec<u32> = (0..num_factors).map(|_| rng.gen_range(1..=12)).collect();
+            let factors: Vec<u64> = (0..num_factors).map(|_| rng.gen_range(1..=12)).collect();
             let limit = rng.gen_range(10..=1000);
             assert_eq!(solve(&factors, limit), naive(&factors, limit));
         }

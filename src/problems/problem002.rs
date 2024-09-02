@@ -1,11 +1,17 @@
 pub fn subject() -> String {
-    solve(&[3, 5], 10).to_string()
+    solve(4_000_000).to_string()
 }
 
-fn solve(factors: &[u32], limit: u32) -> u32 {
-    (1..limit)
-        .filter(|&n| factors.iter().any(|&factor| n % factor == 0))
-        .sum()
+fn solve(limit: u64) -> u64 {
+    let mut a = 2;
+    let mut b = 3;
+    let mut res = 0;
+    while a <= limit {
+        res += a;
+        a += b << 1;
+        b = (a << 1) - b;
+    }
+    return res;
 }
 
 #[cfg(test)]
@@ -14,9 +20,14 @@ mod tests {
 
     #[test]
     fn test_solve() {
-        assert_eq!(solve(&[3, 5], 10), 23);
-        assert_eq!(solve(&[4, 5], 10), 17);
-        assert_eq!(solve(&[3, 6], 10), 18);
-        assert_eq!(solve(&[3, 5], 1000), 233168);
+        assert_eq!(solve(0), 0);
+        assert_eq!(solve(1), 0);
+        assert_eq!(solve(2), 2);
+        assert_eq!(solve(7), 2);
+        assert_eq!(solve(8), 10);
+        assert_eq!(solve(9), 10);
+        assert_eq!(solve(100), 44);
+        assert_eq!(solve(150), 188);
+        assert_eq!(solve(4_000_000), 4613732);
     }
 }
