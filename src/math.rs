@@ -30,6 +30,17 @@ pub fn lcm(a: u64, b: u64) -> u64 {
     a * b / gcd(a, b)
 }
 
+pub fn digits(mut n: u64) -> Vec<u64> {
+    let mut res = vec![];
+    while n >= 10 {
+        res.push(n % 10);
+        n /= 10;
+    }
+    res.push(n);
+    res.reverse();
+    res
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,5 +108,18 @@ mod tests {
         assert_eq!(lcm(42, 4), 84);
         assert_eq!(lcm(42, 5), 210);
         assert_eq!(lcm(42, 63), 126);
+    }
+
+    #[test]
+    fn test_digits() {
+        assert_eq!(digits(0), vec![0]);
+        assert_eq!(digits(6), vec![6]);
+        assert_eq!(digits(9), vec![9]);
+        assert_eq!(digits(10), vec![1, 0]);
+        assert_eq!(digits(42), vec![4, 2]);
+        assert_eq!(digits(99), vec![9, 9]);
+        assert_eq!(digits(100), vec![1, 0, 0]);
+        assert_eq!(digits(666), vec![6, 6, 6]);
+        assert_eq!(digits(999), vec![9, 9, 9]);
     }
 }

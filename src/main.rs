@@ -1,5 +1,6 @@
 mod math;
 mod problems;
+mod utils;
 
 use crate::problems::PROBLEMS;
 
