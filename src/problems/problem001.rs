@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn test_subject() {
-        assert_eq!(solve(&[3, 5], 1000), 233168);
+        assert_eq!(subject(), "233168");
     }
 
     #[test]

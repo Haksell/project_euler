@@ -16,7 +16,12 @@ mod tests {
 
     #[test]
     fn test_subject() {
-        assert_eq!(solve(), 0);
+        assert_eq!(subject(), "");
+    }
+
+    #[test]
+    fn test_solve() {
+        assert_eq!(solve(), 42);
     }
 }
 """

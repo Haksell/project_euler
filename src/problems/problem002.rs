@@ -20,7 +20,7 @@ mod tests {
 
     #[test]
     fn test_subject() {
-        assert_eq!(solve(4_000_000), 4613732);
+        assert_eq!(subject(), "4613732");
     }
 
     #[test]
