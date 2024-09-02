@@ -19,7 +19,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_solve() {
+    fn test_subject() {
+        assert_eq!(solve(4_000_000), 4613732);
+    }
+
+    #[test]
+    fn test_small() {
         assert_eq!(solve(0), 0);
         assert_eq!(solve(1), 0);
         assert_eq!(solve(2), 2);
@@ -28,6 +33,5 @@ mod tests {
         assert_eq!(solve(9), 10);
         assert_eq!(solve(100), 44);
         assert_eq!(solve(150), 188);
-        assert_eq!(solve(4_000_000), 4613732);
     }
 }
