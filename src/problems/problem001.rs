@@ -46,7 +46,7 @@ fn solve(factors: &[u32], limit: u32) -> u64 {
                 + helper(
                     factors,
                     limit,
-                    math::lcm(lcm as u32, factors[i]),
+                    math::lcm(lcm, factors[i] as u64),
                     i + 1,
                     if mult == 1 { -1 } else { 1 },
                 )

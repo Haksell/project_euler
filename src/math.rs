@@ -1,14 +1,33 @@
-// TODO: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
-pub fn gcd(a: u32, b: u32) -> u32 {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
+use std::{cmp::min, mem::swap};
+
+// https://en.wikipedia.org/wiki/Binary_GCD_algorithm
+pub fn gcd(mut a: u64, mut b: u64) -> u64 {
+    if a == 0 {
+        return b;
+    } else if b == 0 {
+        return a;
+    }
+
+    let tz_a = a.trailing_zeros();
+    let tz_b = b.trailing_zeros();
+    let tz_max = min(tz_a, tz_b);
+    a >>= tz_a;
+    b >>= tz_b;
+
+    loop {
+        if a == b {
+            return a << tz_max;
+        }
+        if a > b {
+            swap(&mut a, &mut b);
+        }
+        b -= a;
+        b >>= b.trailing_zeros();
     }
 }
 
-pub fn lcm(a: u32, b: u32) -> u64 {
-    a as u64 * b as u64 / gcd(a, b) as u64
+pub fn lcm(a: u64, b: u64) -> u64 {
+    a * b / gcd(a, b)
 }
 
 #[cfg(test)]
