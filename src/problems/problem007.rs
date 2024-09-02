@@ -22,7 +22,7 @@ mod tests {
 
     #[test]
     fn test_subject() {
-        assert_eq!(subject(), "");
+        assert_eq!(subject(), "104743");
     }
 
     #[test]
