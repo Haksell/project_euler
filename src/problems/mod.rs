@@ -16,7 +16,6 @@ lazy_static! {
     pub static ref PROBLEMS: HashMap<usize, fn() -> String> = {
         let mut map = HashMap::new();
         map.insert(1, problem001::subject as fn() -> String);
-        map.insert(10, problem010::subject as fn() -> String);
         map.insert(2, problem002::subject as fn() -> String);
         map.insert(3, problem003::subject as fn() -> String);
         map.insert(4, problem004::subject as fn() -> String);
@@ -25,6 +24,7 @@ lazy_static! {
         map.insert(7, problem007::subject as fn() -> String);
         map.insert(8, problem008::subject as fn() -> String);
         map.insert(9, problem009::subject as fn() -> String);
+        map.insert(10, problem010::subject as fn() -> String);
         map
     };
 }

@@ -47,7 +47,8 @@ mods = "\n".join(sorted(mods.splitlines() + [f"mod problem{num:03};"]))
 inserts = "\n".join(
     sorted(
         inserts.splitlines()
-        + [f"        map.insert({num}, problem{num:03}::subject as fn() -> String);"]
+        + [f"        map.insert({num}, problem{num:03}::subject as fn() -> String);"],
+        key=lambda s: s.split("problem")[1],
     )
 )
 
