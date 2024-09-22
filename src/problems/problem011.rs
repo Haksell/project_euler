@@ -99,7 +99,6 @@ fn solve_line(line: &[u64], k: usize) -> u64 {
             res = res.max(prod);
         }
     }
-    println!("{line:?} {res}");
     res
 }
 
