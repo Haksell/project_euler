@@ -48,7 +48,7 @@ inserts = "\n".join(
     sorted(
         inserts.splitlines()
         + [f"        map.insert({num}, problem{num:03}::subject as fn() -> String);"],
-        key=lambda line: int(line.split("problem")[1][:3]),
+        key=lambda s: s.split("problem")[1],
     )
 )
 
