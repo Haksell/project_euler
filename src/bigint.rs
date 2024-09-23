@@ -44,7 +44,7 @@ impl BigInt {
         let mut cur = Self::from(b);
         while e != 0 {
             if e & 1 == 1 {
-                res *= cur.clone(); // TODO: no clone
+                res *= &cur;
             }
             cur *= cur.clone(); // TODO: no clone
             e >>= 1;
@@ -342,7 +342,7 @@ impl Mul<u64> for BigInt {
 // BigInt OPERATIONS //
 ///////////////////////
 
-macro_rules! impl_add {
+macro_rules! impl_bigint_add {
     ($t:ty) => {
         impl AddAssign<$t> for BigInt {
             fn add_assign(&mut self, rhs: $t) {
@@ -374,31 +374,38 @@ macro_rules! impl_add {
     };
 }
 
-impl_add!(BigInt);
-impl_add!(&BigInt);
-
 // TODO: Karatsuba or similar
-// TODO: impl_mul!
-impl Mul for BigInt {
-    type Output = Self;
+// TODO: less clones
+macro_rules! impl_bigint_mul {
+    ($t:ty) => {
+        impl Mul<$t> for BigInt {
+            type Output = Self;
 
-    fn mul(self, rhs: BigInt) -> Self {
-        let mut slf = self.clone();
-        let mut res = BigInt::zero();
-        for &num in &rhs.repr {
-            res += slf.clone() * num;
-            slf.repr.insert(0, 0);
+            fn mul(self, rhs: $t) -> Self {
+                let rhs_ref = &rhs;
+                let mut slf = self.clone();
+                let mut res = BigInt::zero();
+                for &num in &rhs_ref.repr {
+                    res += slf.clone() * num;
+                    slf.repr.insert(0, 0);
+                }
+                res.remove_trailing_zeros();
+                res
+            }
         }
-        res.remove_trailing_zeros();
-        res
-    }
+
+        impl MulAssign<$t> for BigInt {
+            fn mul_assign(&mut self, rhs: $t) {
+                *self = self.clone() * rhs;
+            }
+        }
+    };
 }
 
-impl MulAssign for BigInt {
-    fn mul_assign(&mut self, rhs: BigInt) {
-        *self = self.clone() * rhs;
-    }
-}
+impl_bigint_add!(BigInt);
+impl_bigint_add!(&BigInt);
+impl_bigint_mul!(BigInt);
+impl_bigint_mul!(&BigInt);
 
 ///////////////////////
 // ITERATOR ADAPTORS //
