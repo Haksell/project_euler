@@ -21,9 +21,51 @@ pub fn primes_below(n: u64) -> Vec<u64> {
         .collect()
 }
 
-pub fn divisors_below(n: u64) -> Vec<HashMap<u64, u64>> {
+pub fn get_factors(mut n: u64) -> HashMap<u64, u64> {
+    let mut factors = HashMap::new();
+    let mut d = 2;
+    while d * d <= n {
+        let mut count = 0;
+        while n % d == 0 {
+            count += 1;
+            n /= d;
+        }
+        if count > 0 {
+            factors.insert(d, count);
+        }
+        d += 1;
+    }
+    if n > 1 {
+        factors.insert(n, 1);
+    }
+    factors
+}
+
+pub fn count_divisors(mut n: u64) -> u64 {
+    let mut divisors = 1;
+    let mut d = 2;
+    while d * d <= n {
+        let mut count = 0;
+        while n % d == 0 {
+            count += 1;
+            n /= d;
+        }
+        divisors *= count + 1;
+        d += 1;
+    }
+    if n > 1 {
+        divisors <<= 1;
+    }
+    divisors
+}
+
+pub fn count_divisors_from_factors(factors: &HashMap<u64, u64>) -> u64 {
+    factors.values().map(|&n| n + 1).product()
+}
+
+pub fn factors_below(n: u64) -> Vec<HashMap<u64, u64>> {
     let mut nums = (0..n as u64).collect_vec();
-    let mut divisors = vec![HashMap::new(); n as usize];
+    let mut factors = vec![HashMap::new(); n as usize];
     for i in 2..=isqrt(n) {
         if nums[i as usize] == i as u64 {
             for j in (i * i..n).step_by(i as usize) {
@@ -33,16 +75,16 @@ pub fn divisors_below(n: u64) -> Vec<HashMap<u64, u64>> {
                     count += 1;
                     nums[j as usize] /= i;
                 }
-                divisors[j as usize].insert(i, count);
+                factors[j as usize].insert(i, count);
             }
         }
     }
     for (i, &n) in nums.iter().enumerate() {
         if n > 1 {
-            divisors[i].insert(n, 1);
+            factors[i].insert(n, 1);
         }
     }
-    divisors
+    factors
 }
 
 #[cfg(test)]
@@ -58,9 +100,9 @@ mod tests {
     }
 
     #[test]
-    fn test_divisors_below() {
+    fn test_factors_below() {
         assert_eq!(
-            divisors_below(11),
+            factors_below(11),
             vec![
                 HashMap::new(),
                 HashMap::new(),
