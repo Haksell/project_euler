@@ -1,4 +1,4 @@
-// TODO: implement and use BigInt struct
+// TODO: use BigInt struct
 
 pub fn subject() -> String {
     solve(1000).to_string()

@@ -15,7 +15,7 @@ fn parse_file(path: &str) -> Vec<String> {
         .unwrap()
         .lines()
         .map(|line| {
-            assert!(line.chars().all(|c| '0' <= c && c <= '9'));
+            assert!(line.chars().all(|c| c.is_digit(10)));
             line.to_string()
         })
         .collect()
