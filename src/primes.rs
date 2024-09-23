@@ -59,10 +59,6 @@ pub fn count_divisors(mut n: u64) -> u64 {
     divisors
 }
 
-pub fn count_divisors_from_factors(factors: &HashMap<u64, u64>) -> u64 {
-    factors.values().map(|&n| n + 1).product()
-}
-
 pub fn factors_below(n: u64) -> Vec<HashMap<u64, u64>> {
     let mut nums = (0..n as u64).collect_vec();
     let mut factors = vec![HashMap::new(); n as usize];
