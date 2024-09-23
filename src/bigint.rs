@@ -1,5 +1,6 @@
 // TODO: test profusely
 // TODO: remove as many clones as possible
+// TODO: Ord and Eq with u64
 
 use std::cmp::Ordering;
 use std::fmt;
