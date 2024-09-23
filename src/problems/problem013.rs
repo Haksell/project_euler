@@ -2,18 +2,14 @@ use crate::bigint::BigInt;
 use std::fs;
 
 pub fn subject() -> String {
-    let nums = parse_file("input/013.txt");
-    solve(&nums, 10)
-        .iter()
-        .map(|&d| char::from_digit(d as u32, 10).unwrap())
-        .collect()
-}
-
-fn parse_file(path: &str) -> Vec<BigInt> {
-    fs::read_to_string(path)
+    let nums = fs::read_to_string("input/013.txt")
         .unwrap()
         .lines()
         .map(BigInt::from)
+        .collect::<Vec<_>>();
+    solve(&nums, 10)
+        .iter()
+        .map(|&d| char::from_digit(d as u32, 10).unwrap())
         .collect()
 }
 
