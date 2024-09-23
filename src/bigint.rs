@@ -1,5 +1,4 @@
 // TODO: test profusely
-// TODO: remove as many clones as possible, especially in Mul
 // TODO: Ord and Eq with u64
 
 use std::cmp::Ordering;
