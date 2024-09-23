@@ -5,8 +5,8 @@ pub fn subject() -> String {
 }
 
 fn solve(limit: u64) -> u64 {
-    let mut primes: Vec<u64> = vec![];
-    let mut factors = vec![HashMap::<u64, u64>::new(); 2];
+    let mut primes = vec![];
+    let mut factors = vec![HashMap::new(); 2];
 
     for n in 2.. {
         let smallest_factor = {
