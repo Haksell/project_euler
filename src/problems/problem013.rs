@@ -1,5 +1,3 @@
-// TODO: use BigInt struct
-
 use crate::bigint::BigInt;
 use std::fs;
 
