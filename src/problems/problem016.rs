@@ -1,25 +1,15 @@
-// TODO: use BigInt struct
+use crate::bigint::BigInt;
 
 pub fn subject() -> String {
     solve(1000).to_string()
 }
 
 fn solve(exponent: u64) -> u64 {
-    let mut digits = vec![1u8];
-    for _ in 0..exponent {
-        let mut carry = 0;
-        for i in 0..digits.len() {
-            (digits[i], carry) = if digits[i] >= 5 {
-                (digits[i] * 2 - 10 + carry, 1)
-            } else {
-                (digits[i] * 2 + carry, 0)
-            };
-        }
-        if carry == 1 {
-            digits.push(1);
-        }
-    }
-    digits.iter().map(|&d| d as u64).sum()
+    BigInt::power_of_two(exponent)
+        .digits()
+        .iter()
+        .map(|&d| d as u64)
+        .sum()
 }
 
 #[cfg(test)]

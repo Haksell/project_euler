@@ -18,6 +18,14 @@ impl BigInt {
         Self { repr: vec![1] }
     }
 
+    pub fn power_of_two(n: u64) -> Self {
+        let word_shift = (n >> 6) as usize;
+        let bit_shift = n & 63;
+        let mut repr = vec![0; word_shift + 1];
+        repr[word_shift] = 1 << bit_shift;
+        Self { repr }
+    }
+
     pub fn is_zero(&self) -> bool {
         self.repr.is_empty()
     }
