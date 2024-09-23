@@ -1,5 +1,6 @@
 // TODO: use BigInt struct
 
+use crate::bigint::BigInt;
 use std::fs;
 
 pub fn subject() -> String {
@@ -10,39 +11,21 @@ pub fn subject() -> String {
         .collect()
 }
 
-fn parse_file(path: &str) -> Vec<String> {
+fn parse_file(path: &str) -> Vec<BigInt> {
     fs::read_to_string(path)
         .unwrap()
         .lines()
-        .map(|line| {
-            assert!(line.chars().all(|c| c.is_digit(10)));
-            line.to_string()
-        })
+        .map(BigInt::from)
         .collect()
 }
 
-fn solve(nums: &[String], first_digits: usize) -> Vec<u8> {
-    let max_len = nums.iter().map(|n| n.len()).max().unwrap();
-    let mut digits = vec![0u64; max_len];
-    for num in nums {
-        for (i, d) in num.chars().rev().enumerate() {
-            digits[i] += d as u64 - 48;
-        }
-    }
-
-    let mut carry = 0;
-    for i in 0..digits.len() {
-        digits[i] += carry;
-        carry = digits[i] / 10;
-        digits[i] %= 10;
-    }
-
-    while carry > 0 {
-        digits.push(carry % 10);
-        carry /= 10;
-    }
-
-    digits
+fn solve(nums: &[BigInt], first_digits: usize) -> Vec<u8> {
+    nums.iter()
+        .fold(BigInt::zero(), |mut acc, num| {
+            acc += num.clone();
+            acc
+        })
+        .digits()
         .iter()
         .rev()
         .take(first_digits)
@@ -61,12 +44,9 @@ mod tests {
 
     #[test]
     fn test_solve() {
+        assert_eq!(solve(&["12345".into(), "777".into()], 3), vec![1, 3, 1]);
         assert_eq!(
-            solve(&["12345".to_string(), "777".to_string()], 3),
-            vec![1, 3, 1]
-        );
-        assert_eq!(
-            solve(&["12345".to_string(), "777".to_string()], 6),
+            solve(&["12345".into(), "777".into()], 6),
             vec![1, 3, 1, 2, 2]
         );
     }

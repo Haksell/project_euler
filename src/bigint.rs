@@ -9,7 +9,7 @@ pub struct BigInt {
 }
 
 impl BigInt {
-    pub fn zero(&self) -> Self {
+    pub fn zero() -> Self {
         Self { repr: vec![] }
     }
 
@@ -129,6 +129,76 @@ impl fmt::Display for BigInt {
     }
 }
 
+/////////////////////////////
+// BIT SHIFTING OPERATIONS //
+/////////////////////////////
+
+// impl ShlAssign<u64> for BigInt {
+//     fn shl_assign(&mut self, shift: u64) {
+//         let word_shift = (shift >> 6) as usize;
+//         let bit_shift = (shift & 63) as u32;
+
+//         self.repr
+//             .splice(0..0, std::iter::repeat(0).take(word_shift));
+
+//         if bit_shift > 0 {
+//             let mut carry = 0u64;
+//             for digit in self.repr.iter_mut() {
+//                 let new_carry = *digit >> (64 - bit_shift);
+//                 *digit = (*digit << bit_shift) | carry;
+//                 carry = new_carry;
+//             }
+//             if carry > 0 {
+//                 self.repr.push(carry);
+//             }
+//         }
+//     }
+// }
+
+// impl Shl<u64> for BigInt {
+//     type Output = Self;
+
+//     fn shl(self, shift: u64) -> Self {
+//         let mut result = self.clone();
+//         result <<= shift;
+//         result
+//     }
+// }
+
+// impl ShrAssign<u64> for BigInt {
+//     fn shr_assign(&mut self, shift: u64) {
+//         if shift as usize >= self.bit_length() {
+//             self.repr.clear();
+//             return;
+//         }
+
+//         let word_shift = (shift / 64) as usize;
+//         let bit_shift = (shift % 64) as u32;
+
+//         self.repr.drain(0..word_shift);
+
+//         if bit_shift > 0 {
+//             let mut carry = 0u64;
+//             for i in (0..self.repr.len()).rev() {
+//                 let new_carry = self.repr[i] << (64 - bit_shift);
+//                 self.repr[i] = (self.repr[i] >> bit_shift) | carry;
+//                 carry = new_carry;
+//             }
+//             self.remove_trailing_zeros();
+//         }
+//     }
+// }
+
+// impl Shr<u64> for BigInt {
+//     type Output = Self;
+
+//     fn shr(self, shift: u64) -> Self {
+//         let mut result = self.clone();
+//         result >>= shift;
+//         result
+//     }
+// }
+
 ////////////////////
 // u64 OPERATIONS //
 ////////////////////
@@ -181,6 +251,38 @@ impl Mul<u64> for BigInt {
     fn mul(self, rhs: u64) -> Self {
         let mut result = self.clone();
         result *= rhs;
+        result
+    }
+}
+
+///////////////////////
+// BigInt OPERATIONS //
+///////////////////////
+
+impl AddAssign for BigInt {
+    fn add_assign(&mut self, rhs: Self) {
+        while self.repr.len() < rhs.repr.len() {
+            self.repr.push(0);
+        }
+        let mut carry = 0;
+        for (i, &num) in rhs.repr.iter().enumerate() {
+            let (sum1, overflow1) = self.repr[i].overflowing_add(num);
+            let (sum2, overflow2) = sum1.overflowing_add(carry);
+            self.repr[i] = sum2;
+            carry = (overflow1 || overflow2) as u64;
+        }
+        if carry > 0 {
+            self.repr.push(carry);
+        }
+    }
+}
+
+impl Add for BigInt {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        let mut result = self.clone();
+        result += rhs;
         result
     }
 }
