@@ -1,10 +1,12 @@
 // TODO: test profusely
+// TODO: remove as many clones as possible
 
+use std::cmp::Ordering;
 use std::fmt;
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct BigInt {
     repr: Vec<u64>,
 }
@@ -18,12 +20,35 @@ impl BigInt {
         Self { repr: vec![1] }
     }
 
-    pub fn power_of_two(n: u64) -> Self {
+    pub fn pow2(n: u64) -> Self {
         let word_shift = (n >> 6) as usize;
         let bit_shift = n & 63;
         let mut repr = vec![0; word_shift + 1];
         repr[word_shift] = 1 << bit_shift;
         Self { repr }
+    }
+
+    pub fn pow(b: u64, mut e: u64) -> Self {
+        if e == 0 {
+            return Self::one();
+        }
+        if b <= 1 {
+            return Self::from(b);
+        }
+        if b.is_power_of_two() {
+            return Self::pow2(b.trailing_zeros() as u64 * e);
+        }
+
+        let mut res = Self::one();
+        let mut cur = Self::from(b);
+        while e != 0 {
+            if e & 1 == 1 {
+                res *= cur.clone(); // TODO: no clone
+            }
+            cur *= cur.clone(); // TODO: no clone
+            e >>= 1;
+        }
+        res
     }
 
     pub fn factorial(n: u64) -> Self {
@@ -59,6 +84,26 @@ impl BigInt {
         }
     }
 
+    fn remove_trailing_zeros(&mut self) {
+        while self.repr.last() == Some(&0) {
+            self.repr.pop();
+        }
+    }
+}
+
+impl From<u64> for BigInt {
+    fn from(n: u64) -> Self {
+        Self {
+            repr: if n == 0 { vec![] } else { vec![n] },
+        }
+    }
+}
+
+/////////////////////////
+// BASE 10 CONVERSIONS //
+/////////////////////////
+
+impl BigInt {
     // TODO: Karatsuba or similar
     pub fn digits(&self) -> Vec<u8> {
         const BASE: &[u16] = &[6, 1, 6, 1, 5, 5, 9, 0, 7, 3, 7, 0, 4, 4, 7, 6, 4, 4, 8, 1]; // (1<<64).rev()
@@ -94,20 +139,6 @@ impl BigInt {
 
         digits.iter().map(|&d| d as u8).collect()
     }
-
-    // fn remove_trailing_zeros(&mut self) {
-    //     while self.repr.last() == Some(&0) {
-    //         self.repr.pop();
-    //     }
-    // }
-}
-
-impl From<u64> for BigInt {
-    fn from(n: u64) -> Self {
-        Self {
-            repr: if n == 0 { vec![] } else { vec![n] },
-        }
-    }
 }
 
 impl From<&str> for BigInt {
@@ -135,6 +166,12 @@ impl From<&str> for BigInt {
     }
 }
 
+impl From<&String> for BigInt {
+    fn from(s: &String) -> Self {
+        Self::from(s.as_str())
+    }
+}
+
 impl fmt::Display for BigInt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.is_zero() {
@@ -147,6 +184,33 @@ impl fmt::Display for BigInt {
                 .collect::<String>()
                 .fmt(f)
         }
+    }
+}
+
+/////////////////
+// COMPARISONS //
+/////////////////
+
+impl Ord for BigInt {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let len_cmp = self.repr.len().cmp(&other.repr.len());
+        if len_cmp != Ordering::Equal {
+            return len_cmp;
+        }
+
+        for (a, b) in self.repr.iter().rev().zip(other.repr.iter().rev()) {
+            let cmp = a.cmp(b);
+            if cmp != Ordering::Equal {
+                return cmp;
+            }
+        }
+        Ordering::Equal
+    }
+}
+
+impl PartialOrd for BigInt {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -222,6 +286,8 @@ impl fmt::Display for BigInt {
 // u64 OPERATIONS //
 ////////////////////
 
+// TODO: implement for &u64
+
 impl AddAssign<u64> for BigInt {
     fn add_assign(&mut self, rhs: u64) {
         let mut carry = rhs;
@@ -248,7 +314,6 @@ impl Add<u64> for BigInt {
     }
 }
 
-// TODO: Karatsuba or similar
 impl MulAssign<u64> for BigInt {
     fn mul_assign(&mut self, rhs: u64) {
         let mut carry = 0u128;
@@ -276,7 +341,7 @@ impl Mul<u64> for BigInt {
 // BigInt OPERATIONS //
 ///////////////////////
 
-macro_rules! impl_adds {
+macro_rules! impl_add {
     ($t:ty) => {
         impl AddAssign<$t> for BigInt {
             fn add_assign(&mut self, rhs: $t) {
@@ -308,8 +373,35 @@ macro_rules! impl_adds {
     };
 }
 
-impl_adds!(BigInt);
-impl_adds!(&BigInt);
+impl_add!(BigInt);
+impl_add!(&BigInt);
+
+// TODO: Karatsuba or similar
+// TODO: impl_mul!
+impl Mul for BigInt {
+    type Output = Self;
+
+    fn mul(self, rhs: BigInt) -> Self {
+        let mut slf = self.clone();
+        let mut res = BigInt::zero();
+        for &num in &rhs.repr {
+            res += slf.clone() * num;
+            slf.repr.insert(0, 0);
+        }
+        res.remove_trailing_zeros();
+        res
+    }
+}
+
+impl MulAssign for BigInt {
+    fn mul_assign(&mut self, rhs: BigInt) {
+        *self = self.clone() * rhs;
+    }
+}
+
+///////////////////////
+// ITERATOR ADAPTORS //
+///////////////////////
 
 impl<'a> Sum<&'a BigInt> for BigInt {
     fn sum<I>(iter: I) -> BigInt
@@ -328,3 +420,60 @@ impl<'a> Sum<&'a BigInt> for BigInt {
 //         iter.fold(BigInt::one(), |acc, x| acc * x)
 //     }
 // }
+
+///////////
+// TESTS //
+///////////
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_power() {
+        assert_eq!(BigInt::pow(0, 0), BigInt::from("1"));
+        assert_eq!(BigInt::pow(0, 1), BigInt::from("0"));
+        assert_eq!(BigInt::pow(0, 2), BigInt::from("0"));
+        assert_eq!(BigInt::pow(0, 3), BigInt::from("0"));
+        assert_eq!(BigInt::pow(0, 4), BigInt::from("0"));
+
+        assert_eq!(BigInt::pow(1, 0), BigInt::from("1"));
+        assert_eq!(BigInt::pow(1, 1), BigInt::from("1"));
+        assert_eq!(BigInt::pow(1, 2), BigInt::from("1"));
+        assert_eq!(BigInt::pow(1, 3), BigInt::from("1"));
+        assert_eq!(BigInt::pow(1, 4), BigInt::from("1"));
+
+        assert_eq!(BigInt::pow(2, 0), BigInt::from("1"));
+        assert_eq!(BigInt::pow(2, 1), BigInt::from("2"));
+        assert_eq!(BigInt::pow(2, 2), BigInt::from("4"));
+        assert_eq!(BigInt::pow(2, 3), BigInt::from("8"));
+        assert_eq!(BigInt::pow(2, 4), BigInt::from("16"));
+
+        assert_eq!(BigInt::pow(3, 0), BigInt::from("1"));
+        assert_eq!(BigInt::pow(3, 1), BigInt::from("3"));
+        assert_eq!(BigInt::pow(3, 2), BigInt::from("9"));
+        assert_eq!(BigInt::pow(3, 3), BigInt::from("27"));
+        assert_eq!(BigInt::pow(3, 4), BigInt::from("81"));
+
+        assert_eq!(BigInt::pow(4, 0), BigInt::from("1"));
+        assert_eq!(BigInt::pow(4, 1), BigInt::from("4"));
+        assert_eq!(BigInt::pow(4, 2), BigInt::from("16"));
+        assert_eq!(BigInt::pow(4, 3), BigInt::from("64"));
+        assert_eq!(BigInt::pow(4, 4), BigInt::from("256"));
+
+        assert_eq!(BigInt::pow(2, 63), BigInt::from("9223372036854775808"));
+        assert_eq!(BigInt::pow(2, 64), BigInt::from("18446744073709551616"));
+        assert_eq!(
+            BigInt::pow(2, 123),
+            BigInt::from("10633823966279326983230456482242756608")
+        );
+        assert_eq!(BigInt::pow(2, 1000), BigInt::from("10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376"));
+
+        for i in 0..=100 {
+            assert_eq!(
+                BigInt::pow(10, i),
+                BigInt::from(&("1".to_string() + &"0".repeat(i as usize)))
+            );
+        }
+    }
+}

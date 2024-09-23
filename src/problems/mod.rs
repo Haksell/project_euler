@@ -15,6 +15,7 @@ mod problem014;
 mod problem015;
 mod problem016;
 mod problem020;
+mod problem025;
 
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -39,6 +40,7 @@ lazy_static! {
         map.insert(15, problem015::subject as fn() -> String);
         map.insert(16, problem016::subject as fn() -> String);
         map.insert(20, problem020::subject as fn() -> String);
+        map.insert(25, problem025::subject as fn() -> String);
         map
     };
 }

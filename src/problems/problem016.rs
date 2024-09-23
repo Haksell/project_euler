@@ -5,7 +5,7 @@ pub fn subject() -> String {
 }
 
 fn solve(exponent: u64) -> u64 {
-    BigInt::power_of_two(exponent)
+    BigInt::pow2(exponent)
         .digits()
         .iter()
         .map(|&d| d as u64)
