@@ -5,11 +5,11 @@ pub fn subject() -> String {
 }
 
 fn solve(n: u64) -> u64 {
-    let mut res = BigInt::from(1);
-    for i in 2..n {
-        res *= i;
-    }
-    res.digits().iter().map(|&d| d as u64).sum()
+    BigInt::factorial(n)
+        .digits()
+        .iter()
+        .map(|&d| d as u64)
+        .sum()
 }
 
 #[cfg(test)]

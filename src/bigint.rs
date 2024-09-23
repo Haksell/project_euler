@@ -26,6 +26,14 @@ impl BigInt {
         Self { repr }
     }
 
+    pub fn factorial(n: u64) -> Self {
+        let mut res = Self::one();
+        for i in 2..=n {
+            res *= i;
+        }
+        res
+    }
+
     pub fn is_zero(&self) -> bool {
         self.repr.is_empty()
     }
