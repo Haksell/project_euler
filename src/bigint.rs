@@ -1,6 +1,7 @@
 // TODO: test profusely
 
 use std::fmt;
+use std::iter::Sum;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, Default)]
@@ -11,6 +12,10 @@ pub struct BigInt {
 impl BigInt {
     pub fn zero() -> Self {
         Self { repr: vec![] }
+    }
+
+    pub fn one() -> Self {
+        Self { repr: vec![1] }
     }
 
     pub fn is_zero(&self) -> bool {
@@ -158,10 +163,9 @@ impl fmt::Display for BigInt {
 // impl Shl<u64> for BigInt {
 //     type Output = Self;
 
-//     fn shl(self, shift: u64) -> Self {
-//         let mut result = self.clone();
-//         result <<= shift;
-//         result
+//     fn shl(mut self, shift: u64) -> Self {
+//         self <<= shift;
+//         self
 //     }
 // }
 
@@ -192,10 +196,9 @@ impl fmt::Display for BigInt {
 // impl Shr<u64> for BigInt {
 //     type Output = Self;
 
-//     fn shr(self, shift: u64) -> Self {
-//         let mut result = self.clone();
-//         result >>= shift;
-//         result
+//     fn shr(mut self, shift: u64) -> Self {
+//         self >>= shift;
+//         self
 //     }
 // }
 
@@ -223,10 +226,9 @@ impl AddAssign<u64> for BigInt {
 impl Add<u64> for BigInt {
     type Output = Self;
 
-    fn add(self, rhs: u64) -> Self {
-        let mut result = self.clone();
-        result += rhs;
-        result
+    fn add(mut self, rhs: u64) -> Self {
+        self += rhs;
+        self
     }
 }
 
@@ -248,10 +250,9 @@ impl MulAssign<u64> for BigInt {
 impl Mul<u64> for BigInt {
     type Output = Self;
 
-    fn mul(self, rhs: u64) -> Self {
-        let mut result = self.clone();
-        result *= rhs;
-        result
+    fn mul(mut self, rhs: u64) -> Self {
+        self *= rhs;
+        self
     }
 }
 
@@ -259,30 +260,55 @@ impl Mul<u64> for BigInt {
 // BigInt OPERATIONS //
 ///////////////////////
 
-impl AddAssign for BigInt {
-    fn add_assign(&mut self, rhs: Self) {
-        while self.repr.len() < rhs.repr.len() {
-            self.repr.push(0);
+macro_rules! impl_adds {
+    ($t:ty) => {
+        impl AddAssign<$t> for BigInt {
+            fn add_assign(&mut self, rhs: $t) {
+                let rhs_ref = &rhs;
+                while self.repr.len() < rhs_ref.repr.len() {
+                    self.repr.push(0);
+                }
+                let mut carry = 0;
+                for (i, &num) in rhs_ref.repr.iter().enumerate() {
+                    let (sum1, overflow1) = self.repr[i].overflowing_add(num);
+                    let (sum2, overflow2) = sum1.overflowing_add(carry);
+                    self.repr[i] = sum2;
+                    carry = (overflow1 || overflow2) as u64;
+                }
+                if carry > 0 {
+                    self.repr.push(carry);
+                }
+            }
         }
-        let mut carry = 0;
-        for (i, &num) in rhs.repr.iter().enumerate() {
-            let (sum1, overflow1) = self.repr[i].overflowing_add(num);
-            let (sum2, overflow2) = sum1.overflowing_add(carry);
-            self.repr[i] = sum2;
-            carry = (overflow1 || overflow2) as u64;
+
+        impl Add<$t> for BigInt {
+            type Output = Self;
+
+            fn add(mut self, rhs: $t) -> Self {
+                self += rhs;
+                self
+            }
         }
-        if carry > 0 {
-            self.repr.push(carry);
-        }
+    };
+}
+
+impl_adds!(BigInt);
+impl_adds!(&BigInt);
+
+impl<'a> Sum<&'a BigInt> for BigInt {
+    fn sum<I>(iter: I) -> BigInt
+    where
+        I: Iterator<Item = &'a BigInt>,
+    {
+        iter.fold(BigInt::zero(), |acc, x| acc + x)
     }
 }
 
-impl Add for BigInt {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self {
-        let mut result = self.clone();
-        result += rhs;
-        result
-    }
-}
+// impl<'a> Product<&'a BigInt> for BigInt {
+//     fn product<I>(iter: I) -> BigInt
+//     where
+//         I: Iterator<Item = &'a BigInt>,
+//     {
+//         iter.fold(BigInt::one(), |acc, x| acc * x)
+//     }
+// }

@@ -21,10 +21,7 @@ fn parse_file(path: &str) -> Vec<BigInt> {
 
 fn solve(nums: &[BigInt], first_digits: usize) -> Vec<u8> {
     nums.iter()
-        .fold(BigInt::zero(), |mut acc, num| {
-            acc += num.clone();
-            acc
-        })
+        .sum::<BigInt>()
         .digits()
         .iter()
         .rev()
