@@ -1,10 +1,10 @@
 // TODO: test profusely
-// TODO: remove as many clones as possible
+// TODO: remove as many clones as possible, especially in Mul
 // TODO: Ord and Eq with u64
 
 use std::cmp::Ordering;
 use std::fmt;
-use std::iter::Sum;
+use std::iter::{Product, Sum};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -46,7 +46,7 @@ impl BigInt {
             if e & 1 == 1 {
                 res *= &cur;
             }
-            cur *= cur.clone(); // TODO: no clone
+            cur = &cur * &cur; // TODO: no clone
             e >>= 1;
         }
         res
@@ -287,7 +287,8 @@ impl PartialOrd for BigInt {
 // u64 OPERATIONS //
 ////////////////////
 
-// TODO: implement for &u64
+// TODO: implement in reverse
+// TODO: implement for u64
 
 impl AddAssign<u64> for BigInt {
     fn add_assign(&mut self, rhs: u64) {
@@ -306,10 +307,20 @@ impl AddAssign<u64> for BigInt {
     }
 }
 
-impl Add<u64> for BigInt {
-    type Output = Self;
+impl Add<u64> for &BigInt {
+    type Output = BigInt;
 
-    fn add(mut self, rhs: u64) -> Self {
+    fn add(self, rhs: u64) -> BigInt {
+        let mut res = self.clone();
+        res += rhs;
+        res
+    }
+}
+
+impl Add<u64> for BigInt {
+    type Output = BigInt;
+
+    fn add(mut self, rhs: u64) -> BigInt {
         self += rhs;
         self
     }
@@ -329,10 +340,20 @@ impl MulAssign<u64> for BigInt {
     }
 }
 
-impl Mul<u64> for BigInt {
-    type Output = Self;
+impl Mul<u64> for &BigInt {
+    type Output = BigInt;
 
-    fn mul(mut self, rhs: u64) -> Self {
+    fn mul(self, rhs: u64) -> BigInt {
+        let mut res = self.clone();
+        res *= rhs;
+        res
+    }
+}
+
+impl Mul<u64> for BigInt {
+    type Output = BigInt;
+
+    fn mul(mut self, rhs: u64) -> BigInt {
         self *= rhs;
         self
     }
@@ -363,10 +384,20 @@ macro_rules! impl_bigint_add {
             }
         }
 
-        impl Add<$t> for BigInt {
-            type Output = Self;
+        impl Add<$t> for &BigInt {
+            type Output = BigInt;
 
-            fn add(mut self, rhs: $t) -> Self {
+            fn add(self, rhs: $t) -> BigInt {
+                let mut res = self.clone();
+                res += rhs;
+                res
+            }
+        }
+
+        impl Add<$t> for BigInt {
+            type Output = BigInt;
+
+            fn add(mut self, rhs: $t) -> BigInt {
                 self += rhs;
                 self
             }
@@ -378,19 +409,27 @@ macro_rules! impl_bigint_add {
 // TODO: less clones
 macro_rules! impl_bigint_mul {
     ($t:ty) => {
-        impl Mul<$t> for BigInt {
-            type Output = Self;
+        impl Mul<$t> for &BigInt {
+            type Output = BigInt;
 
-            fn mul(self, rhs: $t) -> Self {
+            fn mul(self, rhs: $t) -> BigInt {
                 let rhs_ref = &rhs;
                 let mut slf = self.clone();
                 let mut res = BigInt::zero();
                 for &num in &rhs_ref.repr {
-                    res += slf.clone() * num;
+                    res += &slf * num;
                     slf.repr.insert(0, 0);
                 }
                 res.remove_trailing_zeros();
                 res
+            }
+        }
+
+        impl Mul<$t> for BigInt {
+            type Output = BigInt;
+
+            fn mul(self, rhs: $t) -> BigInt {
+                &self * rhs
             }
         }
 
@@ -420,14 +459,14 @@ impl<'a> Sum<&'a BigInt> for BigInt {
     }
 }
 
-// impl<'a> Product<&'a BigInt> for BigInt {
-//     fn product<I>(iter: I) -> BigInt
-//     where
-//         I: Iterator<Item = &'a BigInt>,
-//     {
-//         iter.fold(BigInt::one(), |acc, x| acc * x)
-//     }
-// }
+impl<'a> Product<&'a BigInt> for BigInt {
+    fn product<I>(iter: I) -> BigInt
+    where
+        I: Iterator<Item = &'a BigInt>,
+    {
+        iter.fold(BigInt::one(), |acc, x| acc * x)
+    }
+}
 
 ///////////
 // TESTS //

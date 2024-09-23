@@ -1,4 +1,4 @@
-// TODO: optimize log(phi), matrices or binary search
+// TODO: optimize using log(phi), matrices or binary search
 // log(10, phi) = 4.784971966781666
 
 use crate::bigint::BigInt;
