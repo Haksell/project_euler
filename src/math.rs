@@ -1,4 +1,7 @@
-use std::{cmp::min, mem::swap};
+#![allow(unused)] // TODO: remove
+
+use crate::primes::factors_below;
+use std::{cmp::min, collections::HashMap, mem::swap};
 
 // https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 pub fn gcd(mut a: u64, mut b: u64) -> u64 {
@@ -55,6 +58,36 @@ pub fn isqrt(n: u64) -> u64 {
         prev = guess;
         guess = new_guess;
     }
+}
+
+#[inline]
+pub fn factorial(n: u64) -> u64 {
+    (2..=n).product()
+}
+
+#[inline]
+pub fn choose(n: u64, mut k: u64) -> u64 {
+    debug_assert!(k <= n);
+    k = min(k, n - k);
+
+    let all_factors = factors_below(n + 1);
+
+    let mut factors_choose = HashMap::new();
+    for i in (n - k + 1)..=n {
+        for (k, v) in &all_factors[i as usize] {
+            *factors_choose.entry(k).or_insert(0) += v;
+        }
+    }
+    for i in 2..=k {
+        for (k, v) in &all_factors[i as usize] {
+            *factors_choose.get_mut(k).unwrap() -= v;
+        }
+    }
+
+    factors_choose
+        .iter()
+        .map(|(&k, &v)| k.pow(v as u32))
+        .product()
 }
 
 #[cfg(test)]
@@ -168,5 +201,41 @@ mod tests {
         assert_eq!(isqrt(10000), 100);
         assert_eq!(isqrt(999999), 999);
         assert_eq!(isqrt(1000000), 1000);
+    }
+
+    #[test]
+    fn test_factorial() {
+        assert_eq!(factorial(0), 1);
+        assert_eq!(factorial(1), 1);
+        assert_eq!(factorial(2), 2);
+        assert_eq!(factorial(3), 6);
+        assert_eq!(factorial(4), 24);
+        assert_eq!(factorial(5), 120);
+        assert_eq!(factorial(6), 720);
+        assert_eq!(factorial(7), 5040);
+    }
+
+    #[test]
+    fn test_choose() {
+        assert_eq!(choose(0, 0), 1);
+        assert_eq!(choose(1, 0), 1);
+        assert_eq!(choose(1, 1), 1);
+        assert_eq!(choose(2, 0), 1);
+        assert_eq!(choose(2, 1), 2);
+        assert_eq!(choose(2, 2), 1);
+        assert_eq!(choose(3, 0), 1);
+        assert_eq!(choose(3, 1), 3);
+        assert_eq!(choose(3, 2), 3);
+        assert_eq!(choose(3, 3), 1);
+        assert_eq!(choose(4, 0), 1);
+        assert_eq!(choose(4, 1), 4);
+        assert_eq!(choose(4, 2), 6);
+        assert_eq!(choose(4, 3), 4);
+        assert_eq!(choose(4, 4), 1);
+        assert_eq!(choose(40, 20), 137_846_528_820);
+        assert_eq!(choose(69, 26), 7_023_301_266_595_310_928);
+        assert_eq!(choose(1337, 0), 1);
+        assert_eq!(choose(1337, 1), 1337);
+        assert_eq!(choose(1337, 2), 1337 * 1336 >> 1);
     }
 }
