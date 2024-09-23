@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-
-use itertools::Itertools;
+#![allow(unused)] // TODO: remove
 
 use crate::math::isqrt;
+use itertools::Itertools;
+use std::collections::HashMap;
 
 pub fn primes_below(n: u64) -> Vec<u64> {
     let mut sieve = vec![true; n as usize];
