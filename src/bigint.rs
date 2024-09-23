@@ -4,7 +4,7 @@
 use std::cmp::Ordering;
 use std::fmt;
 use std::iter::{Product, Sum};
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Shl, ShlAssign, Shr, ShrAssign};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct BigInt {
@@ -218,69 +218,89 @@ impl PartialOrd for BigInt {
 // BIT SHIFTING OPERATIONS //
 /////////////////////////////
 
-// impl ShlAssign<u64> for BigInt {
-//     fn shl_assign(&mut self, shift: u64) {
-//         let word_shift = (shift >> 6) as usize;
-//         let bit_shift = (shift & 63) as u32;
+impl ShlAssign<u64> for BigInt {
+    fn shl_assign(&mut self, shift: u64) {
+        let word_shift = (shift >> 6) as usize;
+        let bit_shift = (shift & 63) as u32;
 
-//         self.repr
-//             .splice(0..0, std::iter::repeat(0).take(word_shift));
+        self.repr
+            .splice(0..0, std::iter::repeat(0).take(word_shift));
 
-//         if bit_shift > 0 {
-//             let mut carry = 0u64;
-//             for digit in self.repr.iter_mut() {
-//                 let new_carry = *digit >> (64 - bit_shift);
-//                 *digit = (*digit << bit_shift) | carry;
-//                 carry = new_carry;
-//             }
-//             if carry > 0 {
-//                 self.repr.push(carry);
-//             }
-//         }
-//     }
-// }
+        if bit_shift > 0 {
+            let mut carry = 0u64;
+            for digit in self.repr.iter_mut() {
+                let new_carry = *digit >> (64 - bit_shift);
+                *digit = (*digit << bit_shift) | carry;
+                carry = new_carry;
+            }
+            if carry > 0 {
+                self.repr.push(carry);
+            }
+        }
+    }
+}
 
-// impl Shl<u64> for BigInt {
-//     type Output = Self;
+impl Shl<u64> for BigInt {
+    type Output = BigInt;
 
-//     fn shl(mut self, shift: u64) -> Self {
-//         self <<= shift;
-//         self
-//     }
-// }
+    fn shl(mut self, shift: u64) -> Self {
+        self <<= shift;
+        self
+    }
+}
 
-// impl ShrAssign<u64> for BigInt {
-//     fn shr_assign(&mut self, shift: u64) {
-//         if shift as usize >= self.bit_length() {
-//             self.repr.clear();
-//             return;
-//         }
+impl Shl<u64> for &BigInt {
+    type Output = BigInt;
 
-//         let word_shift = (shift / 64) as usize;
-//         let bit_shift = (shift % 64) as u32;
+    fn shl(self, shift: u64) -> BigInt {
+        let mut res = self.clone();
+        res <<= shift;
+        res
+    }
+}
 
-//         self.repr.drain(0..word_shift);
+impl ShrAssign<u64> for BigInt {
+    fn shr_assign(&mut self, shift: u64) {
+        if shift as usize >= self.bit_length() {
+            self.repr.clear();
+            return;
+        }
 
-//         if bit_shift > 0 {
-//             let mut carry = 0u64;
-//             for i in (0..self.repr.len()).rev() {
-//                 let new_carry = self.repr[i] << (64 - bit_shift);
-//                 self.repr[i] = (self.repr[i] >> bit_shift) | carry;
-//                 carry = new_carry;
-//             }
-//             self.remove_trailing_zeros();
-//         }
-//     }
-// }
+        let word_shift = (shift / 64) as usize;
+        let bit_shift = (shift % 64) as u32;
 
-// impl Shr<u64> for BigInt {
-//     type Output = Self;
+        self.repr.drain(0..word_shift);
 
-//     fn shr(mut self, shift: u64) -> Self {
-//         self >>= shift;
-//         self
-//     }
-// }
+        if bit_shift > 0 {
+            let mut carry = 0u64;
+            for i in (0..self.repr.len()).rev() {
+                let new_carry = self.repr[i] << (64 - bit_shift);
+                self.repr[i] = (self.repr[i] >> bit_shift) | carry;
+                carry = new_carry;
+            }
+            self.remove_trailing_zeros();
+        }
+    }
+}
+
+impl Shr<u64> for BigInt {
+    type Output = BigInt;
+
+    fn shr(mut self, shift: u64) -> Self {
+        self >>= shift;
+        self
+    }
+}
+
+impl Shr<u64> for &BigInt {
+    type Output = BigInt;
+
+    fn shr(self, shift: u64) -> BigInt {
+        let mut res = self.clone();
+        res >>= shift;
+        res
+    }
+}
 
 ////////////////////
 // u64 OPERATIONS //
@@ -474,6 +494,40 @@ impl<'a> Product<&'a BigInt> for BigInt {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_shl() {
+        assert_eq!(BigInt::from("1") << 0, BigInt::from("1"));
+        assert_eq!(BigInt::from("1") << 1, BigInt::from("2"));
+        assert_eq!(BigInt::from("1") << 10, BigInt::from("1024"));
+        assert_eq!(BigInt::from("3") << 10, BigInt::from("3072"));
+        assert_eq!(BigInt::from("3") << 10, BigInt::from("3072"));
+        assert_eq!(
+            BigInt::from("42") << 69,
+            BigInt::from("24792424035065637371904")
+        );
+        assert_eq!(
+            BigInt::from("12345678901234567890123456789012345678901234567890") >> 65,
+            BigInt::from("334630297138174345883373746749")
+        );
+        assert_eq!(
+            BigInt::from("12345678901234567890123456789012345678901234567890") >> 120,
+            BigInt::from("9287856515498")
+        );
+        assert_eq!(
+            BigInt::from("12345678901234567890123456789012345678901234567890") >> 164,
+            BigInt::zero()
+        );
+    }
+
+    #[test]
+    fn test_shr() {
+        assert_eq!(BigInt::from("1") >> 0, BigInt::from("1"));
+        assert_eq!(BigInt::from("1") >> 1, BigInt::from("0"));
+        assert_eq!(BigInt::from("42") >> 0, BigInt::from("42"));
+        assert_eq!(BigInt::from("42") >> 3, BigInt::from("5"));
+        assert_eq!(BigInt::from("42") >> 6, BigInt::from("0"));
+    }
 
     #[test]
     fn test_power() {
