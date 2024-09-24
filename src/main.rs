@@ -1,4 +1,5 @@
 mod bigint;
+mod combinatorics;
 mod date;
 mod math;
 mod primes;
