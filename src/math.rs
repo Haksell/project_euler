@@ -1,7 +1,37 @@
 #![allow(unused)] // TODO: remove
 
 use crate::primes::factors_below;
-use std::{cmp::min, collections::HashMap, mem::swap};
+use std::{
+    cmp::min,
+    collections::HashMap,
+    mem::swap,
+    ops::{Add, Div, Rem, Sub},
+};
+
+#[inline]
+pub fn div_mod<
+    T: Copy
+        + Div<Output = T>
+        + Rem<Output = T>
+        + Add<Output = T>
+        + Sub<Output = T>
+        + PartialOrd<T>
+        + From<u8>,
+>(
+    n: T,
+    k: T,
+) -> (T, T) {
+    let zero = T::from(0u8);
+    let div = n / k;
+    let rem = n % k;
+    if rem == zero {
+        (div, zero)
+    } else if n >= zero {
+        (div, rem)
+    } else {
+        (div - T::from(1u8), rem + k)
+    }
+}
 
 // https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 pub fn gcd(mut a: u64, mut b: u64) -> u64 {
@@ -29,6 +59,7 @@ pub fn gcd(mut a: u64, mut b: u64) -> u64 {
     }
 }
 
+#[inline]
 pub fn lcm(a: u64, b: u64) -> u64 {
     a * b / gcd(a, b)
 }
@@ -93,6 +124,31 @@ pub fn choose(n: u64, mut k: u64) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_div_mod() {
+        assert_eq!(div_mod(42, 1), (42, 0));
+        assert_eq!(div_mod(42, 2), (21, 0));
+        assert_eq!(div_mod(42, 3), (14, 0));
+        assert_eq!(div_mod(42, 4), (10, 2));
+        assert_eq!(div_mod(42, 5), (8, 2));
+        assert_eq!(div_mod(42, 6), (7, 0));
+        assert_eq!(div_mod(42, 7), (6, 0));
+        assert_eq!(div_mod(42, 8), (5, 2));
+        assert_eq!(div_mod(42, 9), (4, 6));
+        assert_eq!(div_mod(42, 43), (0, 42));
+
+        assert_eq!(div_mod(-42, 1), (-42, 0));
+        assert_eq!(div_mod(-42, 2), (-21, 0));
+        assert_eq!(div_mod(-42, 3), (-14, 0));
+        assert_eq!(div_mod(-42, 4), (-11, 2));
+        assert_eq!(div_mod(-42, 5), (-9, 3));
+        assert_eq!(div_mod(-42, 6), (-7, 0));
+        assert_eq!(div_mod(-42, 7), (-6, 0));
+        assert_eq!(div_mod(-42, 8), (-6, 6));
+        assert_eq!(div_mod(-42, 9), (-5, 3));
+        assert_eq!(div_mod(-42, 43), (-1, 1));
+    }
 
     #[test]
     fn test_gcd() {
