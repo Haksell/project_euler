@@ -36,7 +36,7 @@ assert num > 0
 problem_filename = f"src/problems/problem{num:03}.rs"
 
 mods, top, inserts, bottom = re.fullmatch(
-    r"((?:mod problem\d{3};\n)+)(.*?)((?: +map\.insert[^\n]*;\n)+)(.*)",
+    r"((?:mod \w+;\n)+)(.*?)((?: +map\.insert[^\n]*;\n)+)(.*)",
     open(MOD_FILENAME).read(),
     re.DOTALL | re.MULTILINE,
 ).groups()
