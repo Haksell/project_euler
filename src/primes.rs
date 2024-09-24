@@ -83,6 +83,20 @@ pub fn factors_below(n: u64) -> Vec<HashMap<u64, u64>> {
     factors
 }
 
+pub fn sum_divisors_below(n: u64) -> Vec<u64> {
+    let factors = factors_below(n);
+    let mut sum_divisors = factors
+        .iter()
+        .map(|h| {
+            h.iter()
+                .map(|(&k, &v)| (k.pow(v as u32 + 1) - 1) / (k - 1))
+                .product::<u64>()
+        })
+        .collect::<Vec<_>>();
+    sum_divisors[0] = 0;
+    sum_divisors
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -112,6 +126,14 @@ mod tests {
                 HashMap::from([(3, 2)]),
                 HashMap::from([(2, 1), (5, 1)]),
             ]
+        );
+    }
+
+    #[test]
+    fn test_sum_divisors_below() {
+        assert_eq!(
+            sum_divisors_below(20),
+            vec![0, 1, 3, 4, 7, 6, 12, 8, 15, 13, 18, 12, 28, 14, 24, 24, 31, 18, 39, 20]
         );
     }
 }
