@@ -21,7 +21,6 @@ mod problem019;
 mod problem020;
 mod problem021;
 mod problem022;
-mod problem024;
 mod problem025;
 mod problem067;
 
@@ -29,33 +28,30 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 lazy_static! {
-    pub static ref PROBLEMS: HashMap<usize, fn() -> String> = {
-        let mut map = HashMap::new();
-        map.insert(1, problem001::subject as fn() -> String);
-        map.insert(2, problem002::subject as fn() -> String);
-        map.insert(3, problem003::subject as fn() -> String);
-        map.insert(4, problem004::subject as fn() -> String);
-        map.insert(5, problem005::subject as fn() -> String);
-        map.insert(6, problem006::subject as fn() -> String);
-        map.insert(7, problem007::subject as fn() -> String);
-        map.insert(8, problem008::subject as fn() -> String);
-        map.insert(9, problem009::subject as fn() -> String);
-        map.insert(10, problem010::subject as fn() -> String);
-        map.insert(11, problem011::subject as fn() -> String);
-        map.insert(12, problem012::subject as fn() -> String);
-        map.insert(13, problem013::subject as fn() -> String);
-        map.insert(14, problem014::subject as fn() -> String);
-        map.insert(15, problem015::subject as fn() -> String);
-        map.insert(16, problem016::subject as fn() -> String);
-        map.insert(17, problem017::subject as fn() -> String);
-        map.insert(18, problem018::subject as fn() -> String);
-        map.insert(19, problem019::subject as fn() -> String);
-        map.insert(20, problem020::subject as fn() -> String);
-        map.insert(21, problem021::subject as fn() -> String);
-        map.insert(22, problem022::subject as fn() -> String);
-        map.insert(24, problem024::subject as fn() -> String);
-        map.insert(25, problem025::subject as fn() -> String);
-        map.insert(67, problem067::subject as fn() -> String);
-        map
-    };
+    pub static ref PROBLEMS: HashMap<usize, fn() -> String> = HashMap::from([
+        (1, problem001::subject as fn() -> String),
+        (2, problem002::subject as fn() -> String),
+        (3, problem003::subject as fn() -> String),
+        (4, problem004::subject as fn() -> String),
+        (5, problem005::subject as fn() -> String),
+        (6, problem006::subject as fn() -> String),
+        (7, problem007::subject as fn() -> String),
+        (8, problem008::subject as fn() -> String),
+        (9, problem009::subject as fn() -> String),
+        (10, problem010::subject as fn() -> String),
+        (11, problem011::subject as fn() -> String),
+        (12, problem012::subject as fn() -> String),
+        (13, problem013::subject as fn() -> String),
+        (14, problem014::subject as fn() -> String),
+        (15, problem015::subject as fn() -> String),
+        (16, problem016::subject as fn() -> String),
+        (17, problem017::subject as fn() -> String),
+        (18, problem018::subject as fn() -> String),
+        (19, problem019::subject as fn() -> String),
+        (20, problem020::subject as fn() -> String),
+        (21, problem021::subject as fn() -> String),
+        (22, problem022::subject as fn() -> String),
+        (25, problem025::subject as fn() -> String),
+        (67, problem067::subject as fn() -> String),
+    ]);
 }
