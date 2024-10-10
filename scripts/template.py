@@ -35,23 +35,24 @@ assert num > 0
 
 problem_filename = f"src/problems/problem{num:03}.rs"
 
-mods, top, inserts, bottom = re.fullmatch(
-    r"((?:mod \w+;\n)+)(.*?)((?: +map\.insert[^\n]*;\n)+)(.*)",
+mods, top, pairs, bottom = re.fullmatch(
+    r"((?:mod \w+;\n)+)(.*?)(?:( {8}.* -> String\),\n)+)(.*)",
     open(MOD_FILENAME).read(),
     re.DOTALL | re.MULTILINE,
 ).groups()
 
-assert f"{num:03}" not in mods
+new_mod = f"mod problem{num:03};"
+assert new_mod not in mods
+mods = "\n".join(sorted(mods.splitlines() + [new_mod]))
 
-mods = "\n".join(sorted(mods.splitlines() + [f"mod problem{num:03};"]))
-inserts = "\n".join(
+new_pair = f"        ({num}, problem{num:03}::subject as fn() -> String),"
+pairs = "\n".join(
     sorted(
-        inserts.splitlines()
-        + [f"        map.insert({num}, problem{num:03}::subject as fn() -> String);"],
+        pairs.splitlines() + [new_pair],
         key=lambda s: s.split("problem")[1],
     )
 )
 
-open(MOD_FILENAME, "w").write(mods + "\n" + top + inserts + "\n" + bottom)
+open(MOD_FILENAME, "w").write(mods + "\n" + top + pairs + "\n" + bottom)
 open(problem_filename, "w").write(TEMPLATE)
 os.system(f"code {problem_filename}")
